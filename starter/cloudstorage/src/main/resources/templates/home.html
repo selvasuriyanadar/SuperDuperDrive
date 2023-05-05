@@ -18,6 +18,8 @@
             <div id="contentDiv" style="clear: right;">
                 <nav style="clear: right;">
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a hidden=true id="nav-empty-tab" href="#nav-empty" data-toggle="tab"></a>
+
                         <a id="nav-files-tab-outter" th:href="@{/home}" role="tab"
                             aria-controls="nav-files" th:attr="aria-selected=${fileTab}"
                             class="nav-item nav-link">Files</a>
@@ -35,7 +37,9 @@
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
-                    <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
+                    <div class="tab-pane fade show active" id="nav-empty" role="tabpanel" aria-labelledby="nav-empty-tab">
+                    </div>
+                    <div class="tab-pane fade" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
                         <form th:action="@{/file}" action="#" enctype="multipart/form-data" method="POST">
                             <div class="container">
                                 <div class="row" style="margin: 1em;">
