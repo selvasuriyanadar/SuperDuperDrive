@@ -16,10 +16,10 @@ CREATE TABLE IF NOT EXISTS NOTES (
 );
 
 CREATE TABLE IF NOT EXISTS FILES (
-    fileId INT PRIMARY KEY auto_increment,
+    fileid INT PRIMARY KEY auto_increment,
     filename VARCHAR,
     contenttype VARCHAR,
-    filesize VARCHAR,
+    filesize LONG,
     userid INT,
     filedata BLOB,
     foreign key (userid) references USERS(userid)
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS CREDENTIALS (
     credentialid INT PRIMARY KEY auto_increment,
     url VARCHAR(100),
     username VARCHAR (30),
-    `key` VARCHAR,
+    encryptionkey VARCHAR,
     password VARCHAR,
     userid INT,
     foreign key (userid) references USERS(userid)

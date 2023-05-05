@@ -1,5 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.user.model;
 
+import com.udacity.jwdnd.course1.cloudstorage.hash.model.SaltAndHash;
+
 public class UserForm {
 
     private String username;

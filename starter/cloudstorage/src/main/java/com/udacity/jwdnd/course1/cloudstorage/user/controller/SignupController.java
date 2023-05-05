@@ -2,6 +2,7 @@ package com.udacity.jwdnd.course1.cloudstorage.user.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.user.service.UserService;
 import com.udacity.jwdnd.course1.cloudstorage.user.model.UserForm;
+import com.udacity.jwdnd.course1.cloudstorage.lib.spring.controller.ResponseUtils;
 
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
@@ -32,9 +33,7 @@ public class SignupController {
     @PostMapping()
     public String signupUser(@ModelAttribute("user") UserForm form, Model model) {
         OpsResult result = insert(() -> userService.createUser(form), "There was an error signing you up. Please try again.");
-        model.addAttribute("signupSuccess", result.getStatus() == OpsResult.Status.Success);
-        model.addAttribute("signupError", result.getErrorMessage());
-        return "signup";
+        return ResponseUtils.transferTo(model, result, "signup");
     }
 
 }

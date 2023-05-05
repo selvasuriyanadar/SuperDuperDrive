@@ -1,6 +1,6 @@
-package com.udacity.jwdnd.course1.cloudstorage.user.service;
+package com.udacity.jwdnd.course1.cloudstorage.hash.service;
 
-import com.udacity.jwdnd.course1.cloudstorage.user.model.SaltAndHash;
+import com.udacity.jwdnd.course1.cloudstorage.hash.model.SaltAndHash;
 
 import static selva.oss.lang.Commons.*;
 
@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 
 import java.security.SecureRandom;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.*;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
-import java.security.spec.*;
 import java.util.*;
 
 @Service
@@ -46,7 +46,6 @@ public class HashService {
 
             return Base64.getEncoder().encodeToString(hashedValue);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-
             logger.error(e.getMessage());
             throw new CouldNotHashException();
         }

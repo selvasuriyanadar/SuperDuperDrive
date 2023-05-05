@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.user.service;
 
 import com.udacity.jwdnd.course1.cloudstorage.user.model.User;
+import com.udacity.jwdnd.course1.cloudstorage.hash.service.HashService;
 import com.udacity.jwdnd.course1.cloudstorage.user.mapper.UserMapper;
 
 import org.springframework.stereotype.Service;
