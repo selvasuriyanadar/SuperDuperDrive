@@ -9,7 +9,10 @@ public class CredentialForm {
     private String password;
 
     public Credential getCredential(EncryptedData encryptedData) {
-        Credential credential = new Credential();
+        return transfer(new Credential(), encryptedData);
+    }
+
+    public Credential transfer(Credential credential, EncryptedData encryptedData) {
         credential.setUrl(getUrl());
         credential.setUserName(getUserName());
         credential.setEncryptionKey(encryptedData.getKey());

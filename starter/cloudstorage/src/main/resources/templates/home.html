@@ -55,8 +55,8 @@
                             <table class="table table-striped" id="fileTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 10%" scope="col"></th>
-                                        <th style="width: 10%" scope="col"></th>
+                                        <th style="width: 3%" scope="col"></th>
+                                        <th style="width: 17%" scope="col"></th>
                                         <th style="width: 80%" scope="col">File Name</th>
                                     </tr>
                                 </thead>
@@ -85,8 +85,8 @@
                             <table class="table table-striped" id="userTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 10%" scope="col"></th>
-                                        <th style="width: 10%" scope="col"></th>
+                                        <th style="width: 3%" scope="col"></th>
+                                        <th style="width: 17%" scope="col"></th>
                                         <th style="width: 20%" scope="col">Title</th>
                                         <th style="width: 60%" scope="col">Description</th>
                                     </tr>
@@ -150,22 +150,29 @@
                             <table class="table table-striped" id="credentialTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 20%" scope="col"></th>
+                                        <th style="width: 3%" scope="col"></th>
+                                        <th style="width: 17%" scope="col"></th>
                                         <th style="width: 35%" scope="col">URL</th>
                                         <th style="width: 20%" scope="col">Username</th>
                                         <th style="width: 25%" scope="col">Password</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>
-                                        <button type="button" class="btn btn-success">Edit</button>
-                                        <a class="btn btn-danger">Delete</a>
-                                    </td>
-                                    <th scope="row">Example Credential URL</th>
-                                    <td>Example Credential Username</td>
-                                    <td>Example Credential Password</td>
-                                </tr>
+                                    <tr th:each="credential : ${credentials}" th:attr="id='credential-row-' + ${credential.credentialId}">
+                                        <td>
+                                            <button type="button" class="btn btn-success"
+                                                th:attr="data-credential-id=${credential.credentialId}, data-url=${credential.url}, data-user-name=${credential.userName}, data-password=${credential.decryptedPassword}"
+                                                onclick="showCredentialModal(event)">Edit</button>
+                                        </td>
+                                        <td>
+                                            <form th:action="@{'/credential/delete/' + ${credential.credentialId}}" action="#" enctype="multipart/form-data" method="POST">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                        <th scope="row" th:text="${credential.url}"></th>
+                                        <td th:text="${credential.userName}"></td>
+                                        <td th:text="${credential.password}"></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -180,7 +187,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/credential}" action="#" method="POST">
+                                        <form id="credential-form" th:action="@{/credential}" action="#" method="POST">
                                             <input type="hidden" name="credentialId" id="credential-id">
                                             <div class="form-group">
                                                 <label for="credential-url" class="col-form-label">URL</label>
@@ -218,12 +225,10 @@
             // For opening the note modal
             function showNoteModal(e) {
                 const createUrl = /*[[@{/note}]]*/;
-                console.log(createUrl);
                 const noteId = e ? e.target.getAttribute("data-note-id") : null;
                 const noteTitle = e ? e.target.getAttribute("data-note-title") : null;
                 const noteDescription = e ? e.target.getAttribute("data-note-description") : null;
                 const editUrl = noteId ? (createUrl + "/" + noteId) : null;
-                console.log(editUrl);
 
                 $('#note-form').attr("action", noteId ? editUrl : createUrl);
                 $('#note-id').val(noteId ? noteId : '');
@@ -233,10 +238,18 @@
             }
 
             // For opening the credentials modal
-            function showCredentialModal(credentialId, url, username, password) {
+            function showCredentialModal(e) {
+                const createUrl = /*[[@{/credential}]]*/;
+                const credentialId = e ? e.target.getAttribute("data-credential-id") : null;
+                const url = e ? e.target.getAttribute("data-url") : null;
+                const userName = e ? e.target.getAttribute("data-user-name") : null;
+                const password = e ? e.target.getAttribute("data-password") : null;
+                const editUrl = credentialId ? (createUrl + "/" + credentialId) : null;
+
+                $('#credential-form').attr("action", credentialId ? editUrl : createUrl);
                 $('#credential-id').val(credentialId ? credentialId : '');
                 $('#credential-url').val(url ? url : '');
-                $('#credential-username').val(username ? username : '');
+                $('#credential-username').val(userName ? userName : '');
                 $('#credential-password').val(password ? password : '');
                 $('#credentialModal').modal('show');
             }
@@ -245,11 +258,9 @@
         <script>
             function showTab(e) {
                 if (e.outter.getAttribute("aria-selected")) {
-                    console.log("before tab selection");
                     $('#nav-tab a[href="#' + e.outter.getAttribute("aria-controls") + '"]').tab('show');
                     e.outter.classList.add("active");
                     e.outter.classList.add("show");
-                    console.log("after tab selection");
                 }
             }
             [
