@@ -32,6 +32,11 @@ public class HomeController {
         return "home";
     }
 
+    @ModelAttribute("fileTab")
+    public boolean getTab() {
+        return true;
+    }
+
     @GetMapping()
     public String home(Model model, Authentication authentication) {
         OpsResult result = toOpsResult(() -> fileMapper.getFileShortResponses(userService.getUserId(authentication.getName())), "There was an error fetching the files. Please try again.");

@@ -18,9 +18,20 @@
             <div id="contentDiv" style="clear: right;">
                 <nav style="clear: right;">
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link active" id="nav-files-tab" data-toggle="tab" href="#nav-files" role="tab" aria-controls="nav-files" aria-selected="true">Files</a>
-                        <a class="nav-item nav-link" id="nav-notes-tab" data-toggle="tab" href="#nav-notes" role="tab" aria-controls="nav-notes" aria-selected="false">Notes</a>
-                        <a class="nav-item nav-link" id="nav-credentials-tab" data-toggle="tab" href="#nav-credentials" role="tab" aria-controls="nav-credentials" aria-selected="false">Credentials</a>
+                        <a id="nav-files-tab-outter" th:href="@{/home}" role="tab"
+                            aria-controls="nav-files" th:attr="aria-selected=${fileTab}"
+                            class="nav-item nav-link">Files</a>
+                        <a hidden=true id="nav-files-tab" href="#nav-files" data-toggle="tab"></a>
+
+                        <a id="nav-notes-tab-outter" th:href="@{/note}" role="tab"
+                            aria-controls="nav-notes" th:attr="aria-selected=${noteTab}"
+                            class="nav-item nav-link">Notes</a>
+                        <a hidden=true id="nav-notes-tab" href="#nav-notes" data-toggle="tab"></a>
+
+                        <a id="nav-credentials-tab-outter" th:href="@{/credential}" role="tab"
+                            aria-controls="nav-credentials" th:attr="aria-selected=${credentialTab}"
+                            class="nav-item nav-link">Credentials</a>
+                        <a hidden=true id="nav-credentials-tab" href="#nav-credentials" data-toggle="tab"></a>
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
@@ -74,19 +85,26 @@
                             <table class="table table-striped" id="userTable">
                                 <thead>
                                     <tr>
-                                        <th style="width: 20%" scope="col"></th>
+                                        <th style="width: 10%" scope="col"></th>
+                                        <th style="width: 10%" scope="col"></th>
                                         <th style="width: 20%" scope="col">Title</th>
                                         <th style="width: 60%" scope="col">Description</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    <tr th:each="note : ${notes}" th:attr="id='note-row-' + ${note.noteId}">
                                         <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
-                                            <a class="btn btn-danger">Delete</a>
+                                            <button type="button" class="btn btn-success"
+                                                th:attr="data-note-id=${note.noteId}, data-note-title=${note.noteTitle}, data-note-description=${note.noteDescription}"
+                                                onclick="showNoteModal(event)">Edit</button>
                                         </td>
-                                        <th scope="row">Example Note Title</th>
-                                        <td>Example Note Description </td>
+                                        <td>
+                                            <form th:action="@{'/note/delete/' + ${note.noteId}}" action="#" enctype="multipart/form-data" method="POST">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                        <th scope="row" th:text="${note.noteTitle}"></th>
+                                        <td th:text="${note.noteDescription}"></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -102,7 +120,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/note}" action="#" method="POST">
+                                        <form id="note-form" th:action="@{/note}" method="POST">
                                             <input type="hidden" name="noteId" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
@@ -196,9 +214,18 @@
         <script th:src="@{/js/bootstrap.min.js}"></script>
 
         <!--For opening the note modal-->
-        <script type="text/javascript">
+        <script type="text/javascript" th:inline="javascript">
             // For opening the note modal
-            function showNoteModal(noteId, noteTitle, noteDescription) {
+            function showNoteModal(e) {
+                const createUrl = /*[[@{/note}]]*/;
+                console.log(createUrl);
+                const noteId = e ? e.target.getAttribute("data-note-id") : null;
+                const noteTitle = e ? e.target.getAttribute("data-note-title") : null;
+                const noteDescription = e ? e.target.getAttribute("data-note-description") : null;
+                const editUrl = noteId ? (createUrl + "/" + noteId) : null;
+                console.log(editUrl);
+
+                $('#note-form').attr("action", noteId ? editUrl : createUrl);
                 $('#note-id').val(noteId ? noteId : '');
                 $('#note-title').val(noteTitle ? noteTitle : '');
                 $('#note-description').val(noteDescription ? noteDescription : '');
@@ -213,6 +240,32 @@
                 $('#credential-password').val(password ? password : '');
                 $('#credentialModal').modal('show');
             }
+        </script>
+
+        <script>
+            function showTab(e) {
+                if (e.outter.getAttribute("aria-selected")) {
+                    console.log("before tab selection");
+                    $('#nav-tab a[href="#' + e.outter.getAttribute("aria-controls") + '"]').tab('show');
+                    e.outter.classList.add("active");
+                    e.outter.classList.add("show");
+                    console.log("after tab selection");
+                }
+            }
+            [
+                {
+                    outter: document.getElementById("nav-files-tab-outter"),
+                    nav: document.getElementById("nav-files-tab")
+                },
+                {
+                    outter: document.getElementById("nav-notes-tab-outter"),
+                    nav: document.getElementById("nav-notes-tab")
+                },
+                {
+                    outter: document.getElementById("nav-credentials-tab-outter"),
+                    nav: document.getElementById("nav-credentials-tab")
+                }
+            ].forEach(showTab);
         </script>
     </body>
 </html>

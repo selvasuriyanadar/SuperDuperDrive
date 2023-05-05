@@ -47,7 +47,7 @@ public class FileController {
     }
 
     @PostMapping("/{fileId}")
-    public String postFile(@PathVariable("fileId") Integer fileId, Model model, Authentication authentication) {
+    public String deleteFile(@PathVariable("fileId") Integer fileId, Model model, Authentication authentication) {
         OpsResult result = toOpsResult(() -> fileService.delete(userService.getUserId(authentication.getName()), fileId), "There was an error deleting the file. Please try again.");
         return ResponseUtils.transferTo(model, result, "result");
     }
