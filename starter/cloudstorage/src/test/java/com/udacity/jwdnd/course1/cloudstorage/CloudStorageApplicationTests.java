@@ -1,5 +1,8 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
+import com.udacity.jwdnd.course1.cloudstorage.note.model.NotePage;
+import com.udacity.jwdnd.course1.cloudstorage.credential.model.CredentialPage;
+
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
@@ -11,6 +14,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
 import java.time.Duration;
@@ -23,28 +28,136 @@ class CloudStorageApplicationTests {
 
 	private WebDriver driver;
 
-	@BeforeAll
-	static void beforeAll() {
-		WebDriverManager.chromedriver().setup();
-	}
+    public String baseURL;
 
-	@BeforeEach
-	public void beforeEach() {
-		this.driver = new ChromeDriver();
-	}
+    @BeforeAll
+    public static void beforeAll() {
+        WebDriverManager.firefoxdriver().setup();
+    }
 
-	@AfterEach
-	public void afterEach() {
-		if (this.driver != null) {
-			driver.quit();
-		}
+    @AfterEach
+    public void afterEach() {
+        if (driver != null && ((RemoteWebDriver) driver).getSessionId() != null) {
+            try {
+                driver.quit();
+            }
+            catch (Exception e) {
+                System.out.println("Failed to close web driver.");
+            }
+        }
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        baseURL = "http://localhost:" + port;
+        driver = new FirefoxDriver();
+    }
+
+	@Test
+	public void assertHomePageNotAccessibleWithoutLoggingin() {
+		driver.get(baseURL + "/home");
+		Assertions.assertNotEquals("Home", driver.getTitle());
 	}
 
 	@Test
 	public void getLoginPage() {
-		driver.get("http://localhost:" + this.port + "/login");
+		driver.get(baseURL + "/login");
 		Assertions.assertEquals("Login", driver.getTitle());
 	}
+
+	@Test
+    public void userSignupAndAccessValidation() {
+		doMockSignUp("Access", "Test", "AT", "Test@123");
+        doLogIn("AT", "Test@123");
+
+		driver.get(baseURL + "/home");
+		Assertions.assertEquals("Home", driver.getTitle());
+
+        doLogOut();
+
+		driver.get(baseURL + "/home");
+		Assertions.assertNotEquals("Home", driver.getTitle());
+    }
+
+    @Test
+    public void notesCurdTest() {
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(2));
+
+		doMockSignUp("Notes", "Test", "NT", "Test@123");
+        doLogIn("NT", "Test@123");
+		driver.get(baseURL + "/note");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        NotePage notePage = new NotePage(driver);
+
+        notePage.addNote("title1", "description1");
+		driver.get(baseURL + "/note");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        Assertions.assertTrue(notePage.checkIfFirstEntryMatches("title1", "description1"));
+
+        doLogOut();
+        doLogIn("NT", "Test@123");
+		driver.get(baseURL + "/note");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        notePage.editFirstNote("title1", "description1");
+		driver.get(baseURL + "/note");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        Assertions.assertTrue(notePage.checkIfFirstEntryMatches("title1", "description1"));
+
+        doLogOut();
+        doLogIn("NT", "Test@123");
+		driver.get(baseURL + "/note");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        notePage.deleteFirstNote();
+		driver.get(baseURL + "/note");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        Assertions.assertTrue(notePage.isViewRowsEmpty());
+    }
+
+    @Test
+    public void credentialsCurdTest() {
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(2));
+
+		doMockSignUp("Credentials", "Test", "CT", "Test@123");
+        doLogIn("CT", "Test@123");
+		driver.get(baseURL + "/credential");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        CredentialPage credentialPage = new CredentialPage(driver);
+
+        credentialPage.addCredential("http://google.com", "user1", "password");
+		driver.get(baseURL + "/credential");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        Assertions.assertTrue(credentialPage.checkIfFirstEntryMatches("http://google.com", "user1"));
+
+        doLogOut();
+        doLogIn("CT", "Test@123");
+		driver.get(baseURL + "/credential");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        credentialPage.editFirstCredential("http://yahoo.com", "user2", "password");
+		driver.get(baseURL + "/credential");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        Assertions.assertTrue(credentialPage.checkIfFirstEntryMatches("http://yahoo.com", "user2"));
+
+        doLogOut();
+        doLogIn("CT", "Test@123");
+		driver.get(baseURL + "/credential");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        credentialPage.deleteFirstCredential();
+		driver.get(baseURL + "/credential");
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+        Assertions.assertTrue(credentialPage.isViewRowsEmpty());
+    }
 
 	/**
 	 * PLEASE DO NOT DELETE THIS method.
@@ -55,7 +168,7 @@ class CloudStorageApplicationTests {
 
 		// Visit the sign-up page.
 		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(2));
-		driver.get("http://localhost:" + this.port + "/signup");
+		driver.get(baseURL + "/signup");
 		webDriverWait.until(ExpectedConditions.titleContains("Sign Up"));
 		
 		// Fill out credentials
@@ -88,7 +201,10 @@ class CloudStorageApplicationTests {
 		// You may have to modify the element "success-msg" and the sign-up 
 		// success message below depening on the rest of your code.
 		*/
-		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("success-msg")));
+        String successMsg = driver.findElement(By.id("success-msg")).getText();
+        System.out.println(successMsg);
+		Assertions.assertTrue(successMsg.contains("You successfully signed up!"));
 	}
 
 	
@@ -100,7 +216,7 @@ class CloudStorageApplicationTests {
 	private void doLogIn(String userName, String password)
 	{
 		// Log in to our dummy account.
-		driver.get("http://localhost:" + this.port + "/login");
+		driver.get(baseURL + "/login");
 		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(2));
 
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("inputUsername")));
@@ -118,8 +234,21 @@ class CloudStorageApplicationTests {
 		loginButton.click();
 
 		webDriverWait.until(ExpectedConditions.titleContains("Home"));
-
 	}
+
+    private void doLogOut()
+    {
+	    driver.get(baseURL + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(2));
+
+		webDriverWait.until(ExpectedConditions.titleContains("Home"));
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("logout-button")));
+		WebElement logoutButton = driver.findElement(By.id("logout-button"));
+		logoutButton.click();
+
+		webDriverWait.until(ExpectedConditions.titleContains("Login"));
+    }
 
 	/**
 	 * PLEASE DO NOT DELETE THIS TEST. You may modify this test to work with the 
@@ -135,10 +264,10 @@ class CloudStorageApplicationTests {
 	@Test
 	public void testRedirection() {
 		// Create a test account
-		doMockSignUp("Redirection","Test","RT","123");
+		doMockSignUp("Redirection","Test","RT","Test@123");
 		
 		// Check if we have been redirected to the log in page.
-		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
+		Assertions.assertEquals(baseURL + "/login", driver.getCurrentUrl());
 	}
 
 	/**
@@ -156,11 +285,11 @@ class CloudStorageApplicationTests {
 	@Test
 	public void testBadUrl() {
 		// Create a test account
-		doMockSignUp("URL","Test","UT","123");
-		doLogIn("UT", "123");
+		doMockSignUp("URL","Test","UT","Test@123");
+		doLogIn("UT", "Test@123");
 		
 		// Try to access a random made-up URL.
-		driver.get("http://localhost:" + this.port + "/some-random-page");
+		driver.get(baseURL + "/some-random-page");
 		Assertions.assertFalse(driver.getPageSource().contains("Whitelabel Error Page"));
 	}
 
@@ -180,8 +309,8 @@ class CloudStorageApplicationTests {
 	@Test
 	public void testLargeUpload() {
 		// Create a test account
-		doMockSignUp("Large File","Test","LFT","123");
-		doLogIn("LFT", "123");
+		doMockSignUp("Large File","Test","LFT","Test@123");
+		doLogIn("LFT", "Test@123");
 
 		// Try to upload an arbitrary large file
 		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(2));
@@ -199,9 +328,6 @@ class CloudStorageApplicationTests {
 			System.out.println("Large File upload failed");
 		}
 		Assertions.assertFalse(driver.getPageSource().contains("HTTP Status 403 – Forbidden"));
-
 	}
-
-
 
 }

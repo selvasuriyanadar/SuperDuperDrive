@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/bootstrap.min.css}">
+
+        <title>Error</title>
+    </head>
+    <body class="p-3 mb-2 bg-light text-black">
+        <div class="container justify-content-center w-50 p-3" style="margin-top: 5em;">
+            <div th:if="${unexpected}" class="alert alert-danger fill-parent">
+                <h1 class="display-5">Error</h1>
+                <span>There was an error. Please try again.! Click <a th:href="@{/home}">here</a> to continue.</span>
+            </div>
+            <div th:if="${not_found}" class="alert alert-danger fill-parent">
+                <h1 class="display-5">Error</h1>
+                <span>Could not find what you are looking for! Click <a th:href="@{/home}">here</a> to continue.</span>
+            </div>
+            <div th:if="${not_allowed} and !${error_message}" class="alert alert-danger fill-parent">
+                <h1 class="display-5">Error</h1>
+                <span>Your changes were not saved. Click <a th:href="@{/home}">here</a> to continue.</span>
+            </div>
+            <div th:if="${not_allowed} and ${error_message}" class="alert alert-danger fill-parent">
+                <h1 class="display-5">Error</h1>
+                <span th:text="${error_message}"></span>
+                <span>Click <a th:href="@{/home}">here</a> to continue.</span>
+            </div>
+        </div>
+    </body>
+</html>

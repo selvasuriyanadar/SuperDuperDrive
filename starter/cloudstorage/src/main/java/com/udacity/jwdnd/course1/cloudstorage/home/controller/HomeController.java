@@ -1,4 +1,4 @@
-package com.udacity.jwdnd.course1.cloudstorage.user.controller;
+package com.udacity.jwdnd.course1.cloudstorage.home.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.user.service.UserService;
 import com.udacity.jwdnd.course1.cloudstorage.file.mapper.FileMapper;

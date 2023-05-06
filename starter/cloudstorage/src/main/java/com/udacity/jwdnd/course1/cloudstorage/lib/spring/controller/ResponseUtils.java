@@ -1,20 +1,28 @@
 package com.udacity.jwdnd.course1.cloudstorage.lib.spring.controller;
 
+import static selva.oss.lang.Commons.*;
+import static selva.oss.lang.operation.CurdOps.*;
+import static selva.oss.lang.operation.ExceptionHandler.*;
+import selva.oss.lang.operation.OpsResult;
+
 import org.springframework.ui.Model;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import static selva.oss.lang.Commons.*;
-import static selva.oss.lang.operation.CurdOps.*;
-import static selva.oss.lang.operation.ExceptionHandler.*;
-import selva.oss.lang.operation.OpsResult;
-
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class ResponseUtils {
+
+    public static class NotFoundException extends RuntimeException {
+    }
+
+    public static class OperationNotAllowedException extends RuntimeException {
+        public OperationNotAllowedException() { }
+        public OperationNotAllowedException(String message) { super(message); }
+    }
 
     public static class StreamingResponse {
         public HttpHeaders httpHeaders;
@@ -35,7 +43,7 @@ public class ResponseUtils {
             return new ResponseEntity<StreamingResponseBody>(opsResult.getData().streamingResponseBody, opsResult.getData().httpHeaders, HttpStatus.OK);
         }
         else {
-            return new ResponseEntity<StreamingResponseBody>(out -> out.write(opsResult.getErrorMessage().getBytes(StandardCharsets.UTF_8)), HttpStatus.BAD_REQUEST);
+            throw new OperationNotAllowedException(opsResult.getErrorMessage());
         }
     }
 
