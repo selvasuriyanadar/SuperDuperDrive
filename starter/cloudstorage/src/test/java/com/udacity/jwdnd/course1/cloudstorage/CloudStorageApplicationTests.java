@@ -10,6 +10,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,7 +33,7 @@ class CloudStorageApplicationTests {
 
     @BeforeAll
     public static void beforeAll() {
-        WebDriverManager.firefoxdriver().setup();
+        WebDriverManager.chromedriver().setup();
     }
 
     @AfterEach
@@ -50,7 +51,10 @@ class CloudStorageApplicationTests {
     @BeforeEach
     public void beforeEach() {
         baseURL = "http://localhost:" + port;
-        driver = new FirefoxDriver();
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--start-maximized");
+        chromeOptions.addArguments("--remote-allow-origins=*");
+        driver = new ChromeDriver(chromeOptions);
     }
 
 	@Test
@@ -101,11 +105,11 @@ class CloudStorageApplicationTests {
 		driver.get(baseURL + "/note");
 		webDriverWait.until(ExpectedConditions.titleContains("Home"));
 
-        notePage.editFirstNote("title1", "description1");
+        notePage.editFirstNote("title2", "description2");
 		driver.get(baseURL + "/note");
 		webDriverWait.until(ExpectedConditions.titleContains("Home"));
 
-        Assertions.assertTrue(notePage.checkIfFirstEntryMatches("title1", "description1"));
+        Assertions.assertTrue(notePage.checkIfFirstEntryMatches("title2", "description2"));
 
         doLogOut();
         doLogIn("NT", "Test@123");
